@@ -31,6 +31,10 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
+    # Move to root file
+    - name: Move to root file when pom.xml is located
+      working-directory : /TourGuide
+      
     # Building step : make sure the source code compiles.
     - name: Build with Maven
       run: mvn clean install -B
