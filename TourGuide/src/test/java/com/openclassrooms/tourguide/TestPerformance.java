@@ -1,10 +1,11 @@
 package com.openclassrooms.tourguide;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.time.StopWatch;
@@ -45,60 +46,82 @@ public class TestPerformance {
 	 * TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
 	 */
 
-	@Disabled
+	/**
+	 *  This test intends to track the location of several users using the batch method of trackUserLocation()
+	 * <p>
+	 *  For performance's sake, it ensures that in case of high volume users (up to 100,000 users) the duration of the test is under 15 minutes, otherwise the test fails.
+	 *  The duration is calculated using the StopWatch class.
+	 */
 	@Test
-	public void highVolumeTrackLocation() {
+	@Disabled
+	// Users should be incremented up to 100,000, and test finishes within 15 minutes
+	public void highVolumeTrackLocation() throws ExecutionException, InterruptedException {
+		// ARRANGE
 		GpsUtil gpsUtil = new GpsUtil();
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-		// Users should be incremented up to 100,000, and test finishes within 15
-		// minutes
-		InternalTestHelper.setInternalUserNumber(100);
+
+		// Data : set the amount of user to test the performance at different scale
+		InternalTestHelper.setInternalUserNumber(0);
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 
-		List<User> allUsers = new ArrayList<>();
-		allUsers = tourGuideService.getAllUsers();
+		List<User> allUsers = tourGuideService.getAllUsers();
 
+		// ACT
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
-		for (User user : allUsers) {
-			tourGuideService.trackUserLocation(user);
-		}
+		tourGuideService.trackUserLocationBatch(allUsers);
 		stopWatch.stop();
 		tourGuideService.tracker.stopTracking();
 
 		System.out.println("highVolumeTrackLocation: Time Elapsed: "
 				+ TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
+
+		// ASSERT
+			//test should be completed under 15 minutes
 		assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
 	}
 
-	@Disabled
+	/**
+	 *  This test intends to the rewards for several users using the batch method of calculateRewards()
+	 * <p>
+	 *  For performance's sake, it ensures that in case of high volume users (up to 100,000 users) the duration of the test is under 20 minutes, otherwise the test fails.
+	 *  The duration is calculated using the StopWatch class.
+	 */
 	@Test
-	public void highVolumeGetRewards() {
+	@Disabled
+	// Users should be incremented up to 100,000, and test finishes within 20 minutes
+	public void highVolumeGetRewards() throws ExecutionException, InterruptedException {
+		// ARRANGE
 		GpsUtil gpsUtil = new GpsUtil();
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
 
-		// Users should be incremented up to 100,000, and test finishes within 20
-		// minutes
-		InternalTestHelper.setInternalUserNumber(100);
+			// Data : set the amount of users to test the performance at different scale
+		InternalTestHelper.setInternalUserNumber(0);
+
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
-
 		Attraction attraction = gpsUtil.getAttractions().get(0);
-		List<User> allUsers = new ArrayList<>();
-		allUsers = tourGuideService.getAllUsers();
+
+			// Retrieve all the users in a list
+		List<User> allUsers = tourGuideService.getAllUsers();
+
+		// ACT
 		allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
-		allUsers.forEach(u -> rewardsService.calculateRewards(u));
+			//Use a new method that calculate the rewards in batch for a list of users instead of using a method for each user
+		rewardsService.calculateRewardsBatch(allUsers);
 
 		for (User user : allUsers) {
-			assertTrue(user.getUserRewards().size() > 0);
+            assertFalse(user.getUserRewards().isEmpty());
 		}
 		stopWatch.stop();
 		tourGuideService.tracker.stopTracking();
 
 		System.out.println("highVolumeGetRewards: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime())
 				+ " seconds.");
+		// ASSERT
+			//test should be completed under 20 minutes
 		assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
 	}
 

@@ -1,20 +1,20 @@
 package com.openclassrooms.tourguide;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import gpsUtil.location.Attraction;
-import gpsUtil.location.VisitedLocation;
-
+import com.openclassrooms.tourguide.dto.CloseAttractionsInfo;
+import com.openclassrooms.tourguide.dto.NearByAttraction;
 import com.openclassrooms.tourguide.service.TourGuideService;
 import com.openclassrooms.tourguide.user.User;
 import com.openclassrooms.tourguide.user.UserReward;
-
+import gpsUtil.location.VisitedLocation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import tripPricer.Provider;
+
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 public class TourGuideController {
@@ -28,23 +28,16 @@ public class TourGuideController {
     }
     
     @RequestMapping("/getLocation") 
-    public VisitedLocation getLocation(@RequestParam String userName) {
+    public VisitedLocation getLocation(@RequestParam String userName) throws InterruptedException, ExecutionException {
     	return tourGuideService.getUserLocation(getUser(userName));
     }
-    
-    //  TODO: Change this method to no longer return a List of Attractions.
- 	//  Instead: Get the closest five tourist attractions to the user - no matter how far away they are.
- 	//  Return a new JSON object that contains:
-    	// Name of Tourist attraction, 
-        // Tourist attractions lat/long, 
-        // The user's location lat/long, 
-        // The distance in miles between the user's location and each of the attractions.
-        // The reward points for visiting each Attraction.
-        //    Note: Attraction reward points can be gathered from RewardsCentral
-    @RequestMapping("/getNearbyAttractions") 
-    public List<Attraction> getNearbyAttractions(@RequestParam String userName) {
-    	VisitedLocation visitedLocation = tourGuideService.getUserLocation(getUser(userName));
-    	return tourGuideService.getNearByAttractions(visitedLocation);
+
+    @RequestMapping("/getNearbyAttractions")
+    public CloseAttractionsInfo getNearbyAttractions(@RequestParam String userName) throws ExecutionException, InterruptedException {
+        User user = getUser(userName);
+    	VisitedLocation visitedLocation = tourGuideService.getUserLocation(user);
+    	List<NearByAttraction> nearByAttractions = tourGuideService.getNearByAttractions(visitedLocation, user);
+        return new CloseAttractionsInfo(visitedLocation.location.latitude, visitedLocation.location.longitude, nearByAttractions);
     }
     
     @RequestMapping("/getRewards") 

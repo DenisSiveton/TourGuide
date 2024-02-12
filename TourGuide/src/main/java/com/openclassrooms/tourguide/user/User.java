@@ -70,7 +70,15 @@ public class User {
 	}
 	
 	public void addUserReward(UserReward userReward) {
-		if(userRewards.stream().filter(r -> !r.attraction.attractionName.equals(userReward.attraction)).count() == 0) {
+		boolean isAttractionAlreadyRewarded = false;
+		for (UserReward userRewardIterable : userRewards) {
+			if(userRewardIterable.attraction.attractionName.equals(userReward.attraction.attractionName)){
+				isAttractionAlreadyRewarded = true;
+				break;
+			}
+		}
+		if(!isAttractionAlreadyRewarded)
+		{
 			userRewards.add(userReward);
 		}
 	}
