@@ -39,10 +39,12 @@ jobs:
 
     # Testing step : make sure all tests created by developpers are green to ensure fiability
     - name: Test with Maven
+      working-directory : ./TourGuide
       run: mvn test
 
     # Refactoring step : Place all the JAR files in a specific folder
     - name: move JAR files in staging folder
+      working-directory : ./TourGuide
       run: mkdir staging && cp target/*.jar staging
     
     # Packaging step : Once the building and testing steps are validated, an artifact is generated for deployment.
