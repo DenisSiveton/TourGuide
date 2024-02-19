@@ -18,8 +18,10 @@ on:
     - master
 
 jobs:
-  build:
+  CI_pipeline:
+
     runs-on: ubuntu-latest
+
     steps:
     - name: Check out Repository
       uses: actions/checkout@v3
@@ -29,47 +31,24 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-        
+      
     # Building step : make sure the source code compiles.
-    - name: Build with Maven
+    - name: Build
       working-directory : ./TourGuide
       run: mvn clean install -B
 
-  test:
-# decouper les 3 etapes 
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check out Repository
-      uses: actions/checkout@v3
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
     # Testing step : make sure all tests created by developpers are green to ensure fiability
-    - name: Test with Maven
+    - name: Test
       working-directory : ./TourGuide
       run: mvn test
-      
-  package:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check out Repository
-      uses: actions/checkout@v3
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
+
     # Refactoring step : Place all the JAR files in a specific folder
-    - name: move JAR files in staging folder
+    - name: Package 1/2
       working-directory : ./TourGuide
       run: mkdir staging && cp target/*.jar staging
     
     # Packaging step : Once the building and testing steps are validated, an artifact is generated for deployment.
-    - name: Package 
+    - name: Package 2/2
       uses: actions/upload-artifact@v4
       with:
         name: Package
