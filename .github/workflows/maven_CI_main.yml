@@ -71,7 +71,8 @@ jobs:
     # Refactoring step : Place all the JAR files in a specific folder
     - name: Package 1/2
       working-directory : ./TourGuide
-      run: mkdir staging && cp target/*.jar staging
+      run: ls-a
+      #run: mkdir staging && cp target/*.jar staging
     
     # Packaging step : Once the building and testing steps are validated, an artifact is generated for deployment.
     - name: Package 2/2
