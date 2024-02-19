@@ -39,6 +39,14 @@ jobs:
 # decouper les 3 etapes 
     runs-on: ubuntu-latest
     steps:
+    - name: Check out Repository
+      uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
     # Testing step : make sure all tests created by developpers are green to ensure fiability
     - name: Test with Maven
       working-directory : ./TourGuide
@@ -47,6 +55,14 @@ jobs:
   package:
     runs-on: ubuntu-latest
     steps:
+    - name: Check out Repository
+      uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
     # Refactoring step : Place all the JAR files in a specific folder
     - name: move JAR files in staging folder
       working-directory : ./TourGuide
