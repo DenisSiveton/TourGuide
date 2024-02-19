@@ -35,7 +35,7 @@ jobs:
     # Building step : make sure the source code compiles.
     - name: Build
       working-directory : ./TourGuide
-      run: mvn clean install -B
+      run: mvn -B package --file pom.xml -Dmaven.test.skip=true
 
     # Testing step : make sure all tests created by developpers are green to ensure fiability
     - name: Test
