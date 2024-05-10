@@ -14,6 +14,9 @@ import rewardCentral.RewardCentral;
 import com.openclassrooms.tourguide.model.User;
 import com.openclassrooms.tourguide.model.UserReward;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 @Service
 public class RewardsService {
     private static final double STATUTE_MILES_PER_NAUTICAL_MILE = 1.15077945;
@@ -60,35 +63,25 @@ public class RewardsService {
 	/**
 	 * This method receives a list of users and intends to calculate the rewards (see calculateRewards(User user)) for each of them.
 	 * For performance's sake, the ExecutorService class is used to optimize the process time.
-	 * A dynamic pool of threads is instantiated from the start and will grow as needed to achieve the method role.
+	 * A dynamic pool of threads is instantiated from the start and will grow as needed to achieve the method's role.
 	 *
 	 * @param users the list of users whose rewards will be calculated
-	 * @throws ExecutionException Exception when a task can not compute as it should.
-	 * @throws InterruptedException Exception when a task from a thread is interrupted and cannot be completed.
-	 *
 	 * @author Denis Siveton
 	 * @version 1.0.0
 	 */
-	public void calculateRewardsBatch(List<User> users) throws ExecutionException, InterruptedException {
-		ExecutorService executorService = Executors.newCachedThreadPool();
-		List<Future<String>> futures = new ArrayList<>();
-		for(final User user : users) {
-
-			Future<String> future = executorService.submit(new Callable<String>() {
-				@Override
-				public String call() throws Exception {
+	public void calculateRewardsBatch(List<User> users) throws RuntimeException {
+		try {
+			ExecutorService executorService = Executors.newCachedThreadPool();
+			for (User user : users) {
+				Runnable runnableTask = () -> {
 					calculateRewards(user);
-					return user.getUserName() + "updated.";
-				}
-			});
-
-			futures.add(future);
-		}
-
-		executorService.shutdown();
-
-		for(Future<String> future : futures) {
-			String message = future.get();
+				};
+				executorService.execute(runnableTask);
+			}
+			executorService.shutdown();
+			executorService.awaitTermination(20, TimeUnit.MINUTES);
+		} catch (InterruptedException interruptedException) {
+			throw new RuntimeException(interruptedException.getMessage());
 		}
 	}
 
