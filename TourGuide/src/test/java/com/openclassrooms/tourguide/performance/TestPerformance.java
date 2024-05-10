@@ -1,4 +1,4 @@
-package com.openclassrooms.tourguide;
+package com.openclassrooms.tourguide.performance;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -61,7 +61,7 @@ public class TestPerformance {
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
 
 		// Data : set the amount of user to test the performance at different scale
-		InternalTestHelper.setInternalUserNumber(0);
+		InternalTestHelper.setInternalUserNumber(300000);
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 
 		List<User> allUsers = tourGuideService.getAllUsers();
@@ -88,7 +88,7 @@ public class TestPerformance {
 	 *  The duration is calculated using the StopWatch class.
 	 */
 	@Test
-	@Disabled
+	//@Disabled
 	// Users should be incremented up to 100,000, and test finishes within 20 minutes
 	public void highVolumeGetRewards() throws ExecutionException, InterruptedException {
 		// ARRANGE
@@ -96,7 +96,7 @@ public class TestPerformance {
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
 
 			// Data : set the amount of users to test the performance at different scale
-		InternalTestHelper.setInternalUserNumber(0);
+		InternalTestHelper.setInternalUserNumber(100000);
 
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
