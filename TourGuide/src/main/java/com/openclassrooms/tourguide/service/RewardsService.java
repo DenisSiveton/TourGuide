@@ -14,8 +14,6 @@ import rewardCentral.RewardCentral;
 import com.openclassrooms.tourguide.model.User;
 import com.openclassrooms.tourguide.model.UserReward;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 @Service
 public class RewardsService {

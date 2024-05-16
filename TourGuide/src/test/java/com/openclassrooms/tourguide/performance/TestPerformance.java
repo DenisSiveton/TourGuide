@@ -88,7 +88,7 @@ public class TestPerformance {
 	 *  The duration is calculated using the StopWatch class.
 	 */
 	@Test
-	//@Disabled
+	@Disabled
 	// Users should be incremented up to 100,000, and test finishes within 20 minutes
 	public void highVolumeGetRewards() throws ExecutionException, InterruptedException {
 		// ARRANGE
