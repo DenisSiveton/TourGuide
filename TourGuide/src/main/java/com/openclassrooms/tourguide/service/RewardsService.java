@@ -52,7 +52,8 @@ public class RewardsService {
 	private void searchForNewRewards(User user, List<VisitedLocation> userLocations, List<Attraction> attractions) {
 		for(VisitedLocation visitedLocation : userLocations) {
 			for(Attraction attraction : attractions) {
-				// explication ...
+				// For each attraction, the code checks if the user isn't already rewarded and close enough.
+				//    If both criteria are met, the User gets a new reward for that attraction
 				if(!isAttractionAlreadyRewarded(user, attraction) && (nearAttraction(visitedLocation, attraction))) {
 						user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
 				}
