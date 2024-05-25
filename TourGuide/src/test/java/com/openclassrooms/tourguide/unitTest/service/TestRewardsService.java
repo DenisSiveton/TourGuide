@@ -1,4 +1,4 @@
-package com.openclassrooms.tourguide.unit_test.service;
+package com.openclassrooms.tourguide.unitTest.service;
 
 import com.openclassrooms.tourguide.helper.InternalTestHelper;
 import com.openclassrooms.tourguide.service.RewardsService;

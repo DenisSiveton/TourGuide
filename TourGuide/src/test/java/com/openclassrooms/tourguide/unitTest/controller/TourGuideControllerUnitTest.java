@@ -1,9 +1,8 @@
-package com.openclassrooms.tourguide.unit_test.controller;
+package com.openclassrooms.tourguide.unitTest.controller;
 
 import com.jayway.jsonpath.JsonPath;
 import com.openclassrooms.tourguide.TourguideApplication;
 import com.openclassrooms.tourguide.controller.TourGuideController;
-import com.openclassrooms.tourguide.dto.CloseAttractionsInfo;
 import com.openclassrooms.tourguide.dto.NearByAttraction;
 import com.openclassrooms.tourguide.model.User;
 import com.openclassrooms.tourguide.model.UserReward;
@@ -22,13 +21,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import tripPricer.Provider;
 
 import java.net.URI;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
