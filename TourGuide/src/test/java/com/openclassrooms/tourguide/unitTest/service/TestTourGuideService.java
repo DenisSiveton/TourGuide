@@ -1,4 +1,4 @@
-package com.openclassrooms.tourguide.unit_test.service;
+package com.openclassrooms.tourguide.unitTest.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

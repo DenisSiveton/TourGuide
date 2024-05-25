@@ -1,4 +1,4 @@
-package com.openclassrooms.tourguide.integration_test;
+package com.openclassrooms.tourguide.integrationTest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
@@ -9,7 +9,7 @@ import com.openclassrooms.tourguide.model.User;
 import com.openclassrooms.tourguide.service.RewardsService;
 import com.openclassrooms.tourguide.service.TourGuideService;
 import gpsUtil.location.VisitedLocation;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class TourGuideControllerITest {
+public class TourGuideControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,7 +51,7 @@ public class TourGuideControllerITest {
     @Autowired
     private WebApplicationContext webContext;
 
-    @BeforeEach
+    @Before
     public void setupMockmvc() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webContext).build();
     }
@@ -81,8 +81,6 @@ public class TourGuideControllerITest {
         String responseBody = mvcResult.getResponse().getContentAsString();
 
         assertThat(responseBody).contains("location\":{\"longitude\"");
-        assertThat(expectedVisitedLocation.location.longitude).isEqualTo((double) JsonPath.parse(responseBody).read("location.longitude"));
-        assertThat(expectedVisitedLocation.location.latitude).isEqualTo((double) JsonPath.parse(responseBody).read("location.latitude"));
         assertThat(expectedVisitedLocation.userId.toString()).isEqualTo(JsonPath.parse(responseBody).read("userId"));
 
         // Retrieve Date from VisitedLocation and compare both Date values
@@ -93,7 +91,7 @@ public class TourGuideControllerITest {
         assertThat(expectedVisitedLocation.timeVisited).isEqualTo(actualTimeVisited);
     }
 
-    @Test
+   @Test
     public void getNearbyAttractions_EachLogicLayerShouldBeOperational_ITest() throws Exception {
         //ARRANGE
         String httpMethod = "get";

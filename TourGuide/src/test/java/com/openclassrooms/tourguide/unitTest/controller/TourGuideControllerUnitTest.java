@@ -1,4 +1,4 @@
-package com.openclassrooms.tourguide.unit_test.controller;
+package com.openclassrooms.tourguide.unitTest.controller;
 
 import com.jayway.jsonpath.JsonPath;
 import com.openclassrooms.tourguide.TourguideApplication;
