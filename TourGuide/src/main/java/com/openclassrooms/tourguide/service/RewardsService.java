@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import gpsUtil.GpsUtil;
@@ -25,7 +27,8 @@ public class RewardsService {
 	private static final int ATTRACTION_PROXIMITY_RANGE = 200;
 	private final GpsUtil gpsUtil;
 	private final RewardCentral rewardsCentral;
-	
+	private Logger logger = LoggerFactory.getLogger(TourGuideService.class);
+
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
 		this.rewardsCentral = rewardCentral;
@@ -80,7 +83,7 @@ public class RewardsService {
 			executorService.shutdown();
 			executorService.awaitTermination(20, TimeUnit.MINUTES);
 		} catch (InterruptedException interruptedException) {
-			throw new RuntimeException(interruptedException.getMessage());
+			logger.debug(interruptedException.getMessage());
 		}
 	}
 

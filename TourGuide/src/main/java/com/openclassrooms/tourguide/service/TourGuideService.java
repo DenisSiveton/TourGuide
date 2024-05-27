@@ -109,9 +109,9 @@ public class TourGuideService {
 				try {
 					trackUserLocation(user);
 				} catch (ExecutionException e) {
-					throw new RuntimeException(e);
+					logger.debug(e.getMessage());
 				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
+					logger.debug(e.getMessage());
 				}
 			};
 			executorService.execute(runnableTask);
