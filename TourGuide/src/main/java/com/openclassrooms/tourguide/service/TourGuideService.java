@@ -3,14 +3,13 @@ package com.openclassrooms.tourguide.service;
 import com.openclassrooms.tourguide.dto.NearByAttraction;
 import com.openclassrooms.tourguide.helper.InternalTestHelper;
 import com.openclassrooms.tourguide.tracker.Tracker;
-import com.openclassrooms.tourguide.user.User;
-import com.openclassrooms.tourguide.user.UserReward;
+import com.openclassrooms.tourguide.model.User;
+import com.openclassrooms.tourguide.model.UserReward;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -77,7 +76,7 @@ public class TourGuideService {
 
 	public List<Provider> getTripDeals(User user) {
 		int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
-		List<Provider> providers = tripPricer.getPrice(tripPricerApiKey, user.getUserId(),
+		List<Provider> providers = tripPricer.getPrice(TRIP_PRICER_API_KEY, user.getUserId(),
 				user.getUserPreferences().getNumberOfAdults(), user.getUserPreferences().getNumberOfChildren(),
 				user.getUserPreferences().getTripDuration(), cumulativeRewardPoints);
 		user.setTripDeals(providers);
@@ -97,39 +96,30 @@ public class TourGuideService {
 	 * A dynamic pool of threads is instantiated from the start and will grow as needed to achieve the method role.
 	 *
 	 * @param users the list of users whose rewards will be calculated
-	 * @throws ExecutionException Exception when a task can not compute as it should.
 	 * @throws InterruptedException Exception when a task from a thread is interrupted and cannot be completed.
 	 *
 	 * @author Denis Siveton
 	 * @version 1.0.0
 	 */
 	//Function to optimize with multithreading
-	public void trackUserLocationBatch(List<User> users) throws ExecutionException, InterruptedException {
-		int userListSize = users.size();
-		int numberOfThreads = 15;
-		int subListSize = userListSize/numberOfThreads;
-		List<CompletableFuture<Void>> completableFutureList = new ArrayList<>();
-		for (int j = 0; j < userListSize ; j+= subListSize) {
-			List<User> userSubList = new ArrayList<>(users.subList(j, Math.min(userListSize, j + subListSize)));
-			CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(()-> {
-				for (User user : userSubList) {
-					try {
-						trackUserLocation(user);
-					} catch (ExecutionException e) {
-						throw new RuntimeException(e);
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
+	public void trackUserLocationBatch(List<User> users) throws InterruptedException {
+		ExecutorService executorService = Executors.newCachedThreadPool();
+		for (User user : users) {
+			Runnable runnableTask = () -> {
+				try {
+					trackUserLocation(user);
+				} catch (ExecutionException e) {
+					logger.debug(e.getMessage());
+				} catch (InterruptedException e) {
+					logger.debug(e.getMessage());
 				}
-			});
-			completableFutureList.add(completableFuture);
+			};
+			executorService.execute(runnableTask);
 		}
-
-		for (CompletableFuture<Void> completableFuture : completableFutureList
-		) {
-			completableFuture.get();
-		}
+		executorService.shutdown();
+		executorService.awaitTermination(20, TimeUnit.MINUTES);
 	}
+
 
 	/**
 	 * This method receives a user with its location and calculate the five nearest attraction.
@@ -187,7 +177,7 @@ public class TourGuideService {
 	 * Methods Below: For Internal Testing
 	 * 
 	 **********************************************************************************/
-	private static final String tripPricerApiKey = "test-server-api-key";
+	private static final String TRIP_PRICER_API_KEY = "test-server-api-key";
 	// Database connection will be used for external users, but for testing purposes
 	// internal users are provided and stored in memory
 	private final Map<String, User> internalUserMap = new HashMap<>();

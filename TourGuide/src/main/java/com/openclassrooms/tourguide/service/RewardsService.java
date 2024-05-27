@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import gpsUtil.GpsUtil;
@@ -11,8 +13,9 @@ import gpsUtil.location.Attraction;
 import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 import rewardCentral.RewardCentral;
-import com.openclassrooms.tourguide.user.User;
-import com.openclassrooms.tourguide.user.UserReward;
+import com.openclassrooms.tourguide.model.User;
+import com.openclassrooms.tourguide.model.UserReward;
+
 
 @Service
 public class RewardsService {
@@ -24,7 +27,8 @@ public class RewardsService {
 	private static final int ATTRACTION_PROXIMITY_RANGE = 200;
 	private final GpsUtil gpsUtil;
 	private final RewardCentral rewardsCentral;
-	
+	private Logger logger = LoggerFactory.getLogger(TourGuideService.class);
+
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
 		this.rewardsCentral = rewardCentral;
@@ -49,7 +53,8 @@ public class RewardsService {
 	private void searchForNewRewards(User user, List<VisitedLocation> userLocations, List<Attraction> attractions) {
 		for(VisitedLocation visitedLocation : userLocations) {
 			for(Attraction attraction : attractions) {
-				// explication ...
+				// For each attraction, the code checks if the user isn't already rewarded and close enough.
+				//    If both criteria are met, the User gets a new reward for that attraction
 				if(!isAttractionAlreadyRewarded(user, attraction) && (nearAttraction(visitedLocation, attraction))) {
 						user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
 				}
@@ -60,35 +65,25 @@ public class RewardsService {
 	/**
 	 * This method receives a list of users and intends to calculate the rewards (see calculateRewards(User user)) for each of them.
 	 * For performance's sake, the ExecutorService class is used to optimize the process time.
-	 * A dynamic pool of threads is instantiated from the start and will grow as needed to achieve the method role.
+	 * A dynamic pool of threads is instantiated from the start and will grow as needed to achieve the method's role.
 	 *
 	 * @param users the list of users whose rewards will be calculated
-	 * @throws ExecutionException Exception when a task can not compute as it should.
-	 * @throws InterruptedException Exception when a task from a thread is interrupted and cannot be completed.
-	 *
 	 * @author Denis Siveton
 	 * @version 1.0.0
 	 */
-	public void calculateRewardsBatch(List<User> users) throws ExecutionException, InterruptedException {
-		ExecutorService executorService = Executors.newCachedThreadPool();
-		List<Future<String>> futures = new ArrayList<>();
-		for(final User user : users) {
-
-			Future<String> future = executorService.submit(new Callable<String>() {
-				@Override
-				public String call() throws Exception {
+	public void calculateRewardsBatch(List<User> users) throws RuntimeException {
+		try {
+			ExecutorService executorService = Executors.newCachedThreadPool();
+			for (User user : users) {
+				Runnable runnableTask = () -> {
 					calculateRewards(user);
-					return user.getUserName() + "updated.";
-				}
-			});
-
-			futures.add(future);
-		}
-
-		executorService.shutdown();
-
-		for(Future<String> future : futures) {
-			String message = future.get();
+				};
+				executorService.execute(runnableTask);
+			}
+			executorService.shutdown();
+			executorService.awaitTermination(20, TimeUnit.MINUTES);
+		} catch (InterruptedException interruptedException) {
+			logger.debug(interruptedException.getMessage());
 		}
 	}
 
